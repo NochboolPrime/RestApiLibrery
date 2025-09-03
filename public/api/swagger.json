@@ -1,12 +1,17 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Todo API Service",
-    "description": "Простой REST API для управления задачами с полной CRUD функциональностью",
+    "title": "DSS Books Library API",
+    "description": "REST API для управления личной библиотекой книг с полной CRUD функциональностью, рейтингами и заметками",
     "version": "1.0.0",
     "contact": {
-      "name": "API Support",
-      "email": "support@todoapi.com"
+      "name": "Daniil Sergeevich Shishkin",
+      "email": "dss@library.com",
+      "url": "https://github.com/dss"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
     }
   },
   "servers": [
@@ -16,24 +21,41 @@
     }
   ],
   "paths": {
-    "/todos": {
+    "/books": {
       "get": {
-        "summary": "Получить все задачи",
-        "description": "Возвращает список всех задач с возможностью фильтрации по статусу выполнения",
-        "tags": ["Todos"],
+        "summary": "Получить все книги",
+        "description": "Возвращает список всех книг с возможностью фильтрации по статусу чтения и жанру",
+        "tags": ["Books"],
         "parameters": [
           {
             "in": "query",
-            "name": "completed",
+            "name": "status",
             "schema": {
-              "type": "boolean"
+              "type": "string",
+              "enum": ["unread", "reading", "completed"]
             },
-            "description": "Фильтр по статусу выполнения (true/false)"
+            "description": "Фильтр по статусу чтения"
+          },
+          {
+            "in": "query",
+            "name": "genre",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Фильтр по жанру"
+          },
+          {
+            "in": "query",
+            "name": "author",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Фильтр по автору"
           }
         ],
         "responses": {
           "200": {
-            "description": "Список задач получен успешно",
+            "description": "Список книг получен успешно",
             "content": {
               "application/json": {
                 "schema": {
@@ -46,7 +68,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Todo"
+                        "$ref": "#/components/schemas/Book"
                       }
                     },
                     "meta": {
@@ -54,15 +76,19 @@
                       "properties": {
                         "total": {
                           "type": "number",
-                          "example": 10
+                          "example": 25
                         },
                         "completed": {
                           "type": "number",
-                          "example": 3
+                          "example": 15
                         },
-                        "pending": {
+                        "reading": {
                           "type": "number",
-                          "example": 7
+                          "example": 5
+                        },
+                        "unread": {
+                          "type": "number",
+                          "example": 5
                         }
                       }
                     }
@@ -74,27 +100,65 @@
         }
       },
       "post": {
-        "summary": "Создать новую задачу",
-        "description": "Создает новую задачу с указанными данными",
-        "tags": ["Todos"],
+        "summary": "Добавить новую книгу",
+        "description": "Создает новую книгу в библиотеке с указанными данными",
+        "tags": ["Books"],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["title"],
+                "required": ["title", "author", "genre"],
                 "properties": {
                   "title": {
                     "type": "string",
-                    "description": "Название задачи (обязательное поле)",
-                    "example": "Изучить Swagger документацию",
+                    "description": "Название книги (обязательное поле)",
+                    "example": "Война и мир",
                     "maxLength": 200
                   },
-                  "description": {
+                  "author": {
                     "type": "string",
-                    "description": "Описание задачи (необязательное поле)",
-                    "example": "Изучить основы создания API документации с помощью Swagger",
+                    "description": "Автор книги (обязательное поле)",
+                    "example": "Лев Толстой",
+                    "maxLength": 100
+                  },
+                  "year": {
+                    "type": "integer",
+                    "description": "Год издания",
+                    "example": 1869,
+                    "minimum": 1000,
+                    "maximum": 2030
+                  },
+                  "genre": {
+                    "type": "string",
+                    "description": "Жанр книги (обязательное поле)",
+                    "example": "Классическая литература",
+                    "maxLength": 50
+                  },
+                  "pages": {
+                    "type": "integer",
+                    "description": "Количество страниц",
+                    "example": 1225,
+                    "minimum": 1
+                  },
+                  "rating": {
+                    "type": "integer",
+                    "description": "Рейтинг от 0 до 5 звезд",
+                    "example": 5,
+                    "minimum": 0,
+                    "maximum": 5
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["unread", "reading", "completed"],
+                    "description": "Статус чтения",
+                    "example": "completed"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "description": "Личные заметки о книге",
+                    "example": "Великолепное произведение о русской истории",
                     "maxLength": 1000
                   }
                 }
@@ -104,7 +168,7 @@
         },
         "responses": {
           "201": {
-            "description": "Задача успешно создана",
+            "description": "Книга успешно добавлена",
             "content": {
               "application/json": {
                 "schema": {
@@ -115,7 +179,7 @@
                       "example": true
                     },
                     "data": {
-                      "$ref": "#/components/schemas/Todo"
+                      "$ref": "#/components/schemas/Book"
                     }
                   }
                 }
@@ -135,11 +199,11 @@
         }
       }
     },
-    "/todos/{id}": {
+    "/books/{id}": {
       "get": {
-        "summary": "Получить задачу по ID",
-        "description": "Возвращает конкретную задачу по её идентификатору",
-        "tags": ["Todos"],
+        "summary": "Получить книгу по ID",
+        "description": "Возвращает конкретную книгу по её идентификатору",
+        "tags": ["Books"],
         "parameters": [
           {
             "in": "path",
@@ -149,12 +213,12 @@
               "type": "integer",
               "minimum": 1
             },
-            "description": "Уникальный идентификатор задачи"
+            "description": "Уникальный идентификатор книги"
           }
         ],
         "responses": {
           "200": {
-            "description": "Задача найдена",
+            "description": "Книга найдена",
             "content": {
               "application/json": {
                 "schema": {
@@ -165,7 +229,7 @@
                       "example": true
                     },
                     "data": {
-                      "$ref": "#/components/schemas/Todo"
+                      "$ref": "#/components/schemas/Book"
                     }
                   }
                 }
@@ -173,7 +237,7 @@
             }
           },
           "404": {
-            "description": "Задача не найдена",
+            "description": "Книга не найдена",
             "content": {
               "application/json": {
                 "schema": {
@@ -195,9 +259,9 @@
         }
       },
       "put": {
-        "summary": "Обновить задачу",
-        "description": "Обновляет существующую задачу. Можно обновить любое поле или несколько полей одновременно",
-        "tags": ["Todos"],
+        "summary": "Обновить книгу",
+        "description": "Обновляет существующую книгу. Можно обновить любое поле или несколько полей одновременно",
+        "tags": ["Books"],
         "parameters": [
           {
             "in": "path",
@@ -207,7 +271,7 @@
               "type": "integer",
               "minimum": 1
             },
-            "description": "Уникальный идентификатор задачи"
+            "description": "Уникальный идентификатор книги"
           }
         ],
         "requestBody": {
@@ -219,20 +283,53 @@
                 "properties": {
                   "title": {
                     "type": "string",
-                    "description": "Новое название задачи",
-                    "example": "Изучить OpenAPI спецификацию",
+                    "description": "Новое название книги",
+                    "example": "Война и мир (полное издание)",
                     "maxLength": 200
                   },
-                  "description": {
+                  "author": {
                     "type": "string",
-                    "description": "Новое описание задачи",
-                    "example": "Подробно изучить OpenAPI 3.0 спецификацию для создания качественной документации",
-                    "maxLength": 1000
+                    "description": "Автор книги",
+                    "example": "Лев Николаевич Толстой",
+                    "maxLength": 100
                   },
-                  "completed": {
-                    "type": "boolean",
-                    "description": "Статус выполнения задачи",
-                    "example": true
+                  "year": {
+                    "type": "integer",
+                    "description": "Год издания",
+                    "example": 1869,
+                    "minimum": 1000,
+                    "maximum": 2030
+                  },
+                  "genre": {
+                    "type": "string",
+                    "description": "Жанр книги",
+                    "example": "Роман-эпопея",
+                    "maxLength": 50
+                  },
+                  "pages": {
+                    "type": "integer",
+                    "description": "Количество страниц",
+                    "example": 1300,
+                    "minimum": 1
+                  },
+                  "rating": {
+                    "type": "integer",
+                    "description": "Рейтинг от 0 до 5 звезд",
+                    "example": 5,
+                    "minimum": 0,
+                    "maximum": 5
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["unread", "reading", "completed"],
+                    "description": "Статус чтения",
+                    "example": "completed"
+                  },
+                  "notes": {
+                    "type": "string",
+                    "description": "Личные заметки о книге",
+                    "example": "Перечитал второй раз - еще лучше!",
+                    "maxLength": 1000
                   }
                 }
               }
@@ -241,7 +338,7 @@
         },
         "responses": {
           "200": {
-            "description": "Задача успешно обновлена",
+            "description": "Книга успешно обновлена",
             "content": {
               "application/json": {
                 "schema": {
@@ -252,7 +349,7 @@
                       "example": true
                     },
                     "data": {
-                      "$ref": "#/components/schemas/Todo"
+                      "$ref": "#/components/schemas/Book"
                     }
                   }
                 }
@@ -260,7 +357,7 @@
             }
           },
           "404": {
-            "description": "Задача не найдена",
+            "description": "Книга не найдена",
             "content": {
               "application/json": {
                 "schema": {
@@ -282,9 +379,9 @@
         }
       },
       "delete": {
-        "summary": "Удалить задачу",
-        "description": "Удаляет задачу по её идентификатору. Операция необратима",
-        "tags": ["Todos"],
+        "summary": "Удалить книгу",
+        "description": "Удаляет книгу по её идентификатору. Операция необратима",
+        "tags": ["Books"],
         "parameters": [
           {
             "in": "path",
@@ -294,12 +391,12 @@
               "type": "integer",
               "minimum": 1
             },
-            "description": "Уникальный идентификатор задачи"
+            "description": "Уникальный идентификатор книги"
           }
         ],
         "responses": {
           "200": {
-            "description": "Задача успешно удалена",
+            "description": "Книга успешно удалена",
             "content": {
               "application/json": {
                 "schema": {
@@ -311,7 +408,7 @@
                     },
                     "message": {
                       "type": "string",
-                      "example": "Задача успешно удалена"
+                      "example": "Книга успешно удалена из библиотеки"
                     }
                   }
                 }
@@ -319,7 +416,7 @@
             }
           },
           "404": {
-            "description": "Задача не найдена",
+            "description": "Книга не найдена",
             "content": {
               "application/json": {
                 "schema": {
@@ -341,10 +438,10 @@
         }
       }
     },
-    "/todos/stats": {
+    "/books/stats": {
       "get": {
-        "summary": "Получить статистику задач",
-        "description": "Возвращает общую статистику по всем задачам включая процент выполнения",
+        "summary": "Получить статистику библиотеки",
+        "description": "Возвращает общую статистику по всем книгам включая количество по жанрам и статусам чтения",
         "tags": ["Statistics"],
         "responses": {
           "200": {
@@ -363,23 +460,38 @@
                       "properties": {
                         "total": {
                           "type": "number",
-                          "description": "Общее количество задач",
-                          "example": 15
+                          "description": "Общее количество книг в библиотеке",
+                          "example": 25
                         },
                         "completed": {
                           "type": "number",
-                          "description": "Количество выполненных задач",
+                          "description": "Количество прочитанных книг",
+                          "example": 15
+                        },
+                        "reading": {
+                          "type": "number",
+                          "description": "Количество книг в процессе чтения",
+                          "example": 5
+                        },
+                        "unread": {
+                          "type": "number",
+                          "description": "Количество непрочитанных книг",
+                          "example": 5
+                        },
+                        "genres": {
+                          "type": "number",
+                          "description": "Количество уникальных жанров",
                           "example": 8
                         },
-                        "pending": {
+                        "averageRating": {
                           "type": "number",
-                          "description": "Количество невыполненных задач",
-                          "example": 7
+                          "description": "Средний рейтинг всех книг",
+                          "example": 4.2
                         },
-                        "completionRate": {
+                        "totalPages": {
                           "type": "number",
-                          "description": "Процент выполнения (0-100)",
-                          "example": 53
+                          "description": "Общее количество страниц всех книг",
+                          "example": 12500
                         }
                       }
                     }
@@ -394,43 +506,81 @@
   },
   "components": {
     "schemas": {
-      "Todo": {
+      "Book": {
         "type": "object",
         "properties": {
           "id": {
             "type": "integer",
-            "description": "Уникальный идентификатор задачи",
+            "description": "Уникальный идентификатор книги",
             "example": 1
           },
           "title": {
             "type": "string",
-            "description": "Название задачи",
-            "example": "Изучить REST API"
+            "description": "Название книги",
+            "example": "Война и мир"
           },
-          "description": {
+          "author": {
             "type": "string",
-            "description": "Описание задачи",
-            "example": "Понять принципы работы RESTful веб-сервисов"
+            "description": "Автор книги",
+            "example": "Лев Толстой"
           },
-          "completed": {
-            "type": "boolean",
-            "description": "Статус выполнения задачи",
-            "example": false
+          "year": {
+            "type": "integer",
+            "description": "Год издания",
+            "example": 1869
+          },
+          "genre": {
+            "type": "string",
+            "description": "Жанр книги",
+            "example": "Классическая литература"
+          },
+          "pages": {
+            "type": "integer",
+            "description": "Количество страниц",
+            "example": 1225
+          },
+          "rating": {
+            "type": "integer",
+            "description": "Рейтинг от 0 до 5 звезд",
+            "example": 5
+          },
+          "status": {
+            "type": "string",
+            "enum": ["unread", "reading", "completed"],
+            "description": "Статус чтения книги",
+            "example": "completed"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Личные заметки о книге",
+            "example": "Великолепное произведение о русской истории и человеческой природе"
           },
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "description": "Дата и время создания задачи",
+            "description": "Дата и время добавления книги в библиотеку",
             "example": "2024-01-15T10:30:00.000Z"
           },
           "updatedAt": {
             "type": "string",
             "format": "date-time",
-            "description": "Дата и время последнего обновления задачи",
+            "description": "Дата и время последнего обновления информации о книге",
             "example": "2024-01-15T14:45:00.000Z"
           }
         },
-        "required": ["id", "title", "description", "completed", "createdAt", "updatedAt"]
+        "required": [
+          "id",
+          "title",
+          "author",
+          "year",
+          "genre",
+          "pages",
+          "rating",
+          "status",
+          "notes",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "Error": {
         "type": "object",
@@ -442,7 +592,7 @@
           "error": {
             "type": "string",
             "description": "Описание ошибки",
-            "example": "Задача не найдена"
+            "example": "Книга не найдена в библиотеке"
           }
         },
         "required": ["success", "error"]
@@ -451,12 +601,12 @@
   },
   "tags": [
     {
-      "name": "Todos",
-      "description": "Операции с задачами - создание, чтение, обновление и удаление"
+      "name": "Books",
+      "description": "Операции с книгами - добавление, просмотр, обновление и удаление из личной библиотеки"
     },
     {
       "name": "Statistics",
-      "description": "Статистическая информация о задачах"
+      "description": "Статистическая информация о библиотеке книг и прогрессе чтения"
     }
   ]
 }

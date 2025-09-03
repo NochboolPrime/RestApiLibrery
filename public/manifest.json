@@ -1,0 +1,27 @@
+{
+  "name": "DSS Библиотека Книг",
+  "short_name": "DSS Books",
+  "description": "Система управления личной коллекцией книг",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/dss-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/dss-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["productivity", "books", "education"],
+  "lang": "ru",
+  "dir": "ltr"
+}
