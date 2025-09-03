@@ -1,0 +1,462 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Todo API Service",
+    "description": "Простой REST API для управления задачами с полной CRUD функциональностью",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support",
+      "email": "support@todoapi.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "Development server"
+    }
+  ],
+  "paths": {
+    "/todos": {
+      "get": {
+        "summary": "Получить все задачи",
+        "description": "Возвращает список всех задач с возможностью фильтрации по статусу выполнения",
+        "tags": ["Todos"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "completed",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Фильтр по статусу выполнения (true/false)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список задач получен успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Todo"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "number",
+                          "example": 10
+                        },
+                        "completed": {
+                          "type": "number",
+                          "example": 3
+                        },
+                        "pending": {
+                          "type": "number",
+                          "example": 7
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Создать новую задачу",
+        "description": "Создает новую задачу с указанными данными",
+        "tags": ["Todos"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title"],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Название задачи (обязательное поле)",
+                    "example": "Изучить Swagger документацию",
+                    "maxLength": 200
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Описание задачи (необязательное поле)",
+                    "example": "Изучить основы создания API документации с помощью Swagger",
+                    "maxLength": 1000
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Задача успешно создана",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Todo"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные данные запроса",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/todos/{id}": {
+      "get": {
+        "summary": "Получить задачу по ID",
+        "description": "Возвращает конкретную задачу по её идентификатору",
+        "tags": ["Todos"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Уникальный идентификатор задачи"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Задача найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Todo"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Задача не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверный формат ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Обновить задачу",
+        "description": "Обновляет существующую задачу. Можно обновить любое поле или несколько полей одновременно",
+        "tags": ["Todos"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Уникальный идентификатор задачи"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Новое название задачи",
+                    "example": "Изучить OpenAPI спецификацию",
+                    "maxLength": 200
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Новое описание задачи",
+                    "example": "Подробно изучить OpenAPI 3.0 спецификацию для создания качественной документации",
+                    "maxLength": 1000
+                  },
+                  "completed": {
+                    "type": "boolean",
+                    "description": "Статус выполнения задачи",
+                    "example": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Задача успешно обновлена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Todo"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Задача не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные данные запроса",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Удалить задачу",
+        "description": "Удаляет задачу по её идентификатору. Операция необратима",
+        "tags": ["Todos"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Уникальный идентификатор задачи"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Задача успешно удалена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Задача успешно удалена"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Задача не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверный формат ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/todos/stats": {
+      "get": {
+        "summary": "Получить статистику задач",
+        "description": "Возвращает общую статистику по всем задачам включая процент выполнения",
+        "tags": ["Statistics"],
+        "responses": {
+          "200": {
+            "description": "Статистика получена успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "number",
+                          "description": "Общее количество задач",
+                          "example": 15
+                        },
+                        "completed": {
+                          "type": "number",
+                          "description": "Количество выполненных задач",
+                          "example": 8
+                        },
+                        "pending": {
+                          "type": "number",
+                          "description": "Количество невыполненных задач",
+                          "example": 7
+                        },
+                        "completionRate": {
+                          "type": "number",
+                          "description": "Процент выполнения (0-100)",
+                          "example": 53
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Todo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Уникальный идентификатор задачи",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "description": "Название задачи",
+            "example": "Изучить REST API"
+          },
+          "description": {
+            "type": "string",
+            "description": "Описание задачи",
+            "example": "Понять принципы работы RESTful веб-сервисов"
+          },
+          "completed": {
+            "type": "boolean",
+            "description": "Статус выполнения задачи",
+            "example": false
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Дата и время создания задачи",
+            "example": "2024-01-15T10:30:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Дата и время последнего обновления задачи",
+            "example": "2024-01-15T14:45:00.000Z"
+          }
+        },
+        "required": ["id", "title", "description", "completed", "createdAt", "updatedAt"]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "description": "Описание ошибки",
+            "example": "Задача не найдена"
+          }
+        },
+        "required": ["success", "error"]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Todos",
+      "description": "Операции с задачами - создание, чтение, обновление и удаление"
+    },
+    {
+      "name": "Statistics",
+      "description": "Статистическая информация о задачах"
+    }
+  ]
+}
