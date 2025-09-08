@@ -55,9 +55,10 @@ export default function ApiDocsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Todo API Documentation</CardTitle>
+              <CardTitle>Books API Documentation</CardTitle>
               <CardDescription>
-                Интерактивная документация REST API с возможностью тестирования endpoints
+                Интерактивная документация REST API для управления библиотекой книг с возможностью тестирования
+                endpoints
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -79,12 +80,26 @@ export default function ApiDocsPage() {
                 <div>
                   <h3 className="font-semibold mb-2">Доступные endpoints:</h3>
                   <ul className="text-sm space-y-1 text-muted-foreground">
-                    <li>• GET /api/todos - получить все задачи</li>
-                    <li>• POST /api/todos - создать новую задачу</li>
-                    <li>• GET /api/todos/[id] - получить задачу по ID</li>
-                    <li>• PUT /api/todos/[id] - обновить задачу</li>
-                    <li>• DELETE /api/todos/[id] - удалить задачу</li>
-                    <li>• GET /api/todos/stats - получить статистику</li>
+                    <li>• GET /api/books - получить все книги</li>
+                    <li>• POST /api/books - добавить новую книгу</li>
+                    <li>• GET /api/books/[id] - получить книгу по ID</li>
+                    <li>• PUT /api/books/[id] - обновить информацию о книге</li>
+                    <li>• DELETE /api/books/[id] - удалить книгу</li>
+                    <li>• GET /api/books/stats - получить статистику библиотеки</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-2">Модель данных книги:</h3>
+                  <ul className="text-sm space-y-1 text-muted-foreground">
+                    <li>• title - название книги (обязательное)</li>
+                    <li>• author - автор книги (обязательное)</li>
+                    <li>• year - год издания</li>
+                    <li>• genre - жанр книги (обязательное)</li>
+                    <li>• pages - количество страниц</li>
+                    <li>• rating - рейтинг от 1 до 5</li>
+                    <li>• status - статус чтения (unread, reading, completed)</li>
+                    <li>• notes - заметки о книге</li>
                   </ul>
                 </div>
               </div>
