@@ -1,12 +1,23 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { bookStorage } from "@/lib/book-storage"
+import { createClient } from "@/lib/supabase/server"
 
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const id = Number.parseInt(params.id)
-    const book = bookStorage.getBookById(id)
+    const supabase = await createClient()
 
-    if (!book) {
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    }
+
+    const id = Number.parseInt(params.id)
+
+    const { data: book, error } = await supabase.from("user_books").select("*").eq("id", id).single()
+
+    if (error || !book) {
       return NextResponse.json({ success: false, error: "Book not found" }, { status: 404 })
     }
 
@@ -22,12 +33,30 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    const supabase = await createClient()
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    }
+
     const id = Number.parseInt(params.id)
     const body = await request.json()
 
-    const book = bookStorage.updateBook(id, body)
+    const { data: book, error } = await supabase
+      .from("user_books")
+      .update({
+        ...body,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id)
+      .select()
+      .single()
 
-    if (!book) {
+    if (error || !book) {
       return NextResponse.json({ success: false, error: "Book not found" }, { status: 404 })
     }
 
@@ -43,10 +72,21 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const id = Number.parseInt(params.id)
-    const success = bookStorage.deleteBook(id)
+    const supabase = await createClient()
 
-    if (!success) {
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+    }
+
+    const id = Number.parseInt(params.id)
+
+    const { error } = await supabase.from("user_books").delete().eq("id", id)
+
+    if (error) {
       return NextResponse.json({ success: false, error: "Book not found" }, { status: 404 })
     }
 
